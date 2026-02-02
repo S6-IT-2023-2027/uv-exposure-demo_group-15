@@ -39,15 +39,22 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
               itemCount: _options.length,
               separatorBuilder: (ctx, i) => const Divider(height: 1),
               itemBuilder: (context, index) {
-                return RadioListTile<int>(
-                  activeColor: Colors.teal,
+                return ListTile(
                   title: Text(_options[index]),
-                  value: index,
-                  groupValue: _selectedIndex,
-                  onChanged: (val) {
-                    setState(() {
-                      _selectedIndex = val!;
-                    });
+                  leading: Radio<int>(
+                    value: index,
+                    groupValue: _selectedIndex,
+                    onChanged: (val) {
+                      setState(() {
+                         _selectedIndex = val!;
+                      });
+                    },
+                    activeColor: Colors.teal,
+                  ),
+                  onTap: () {
+                     setState(() {
+                       _selectedIndex = index;
+                     });
                   },
                 );
               },

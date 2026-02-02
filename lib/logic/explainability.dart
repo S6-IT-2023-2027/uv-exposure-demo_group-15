@@ -1,5 +1,3 @@
-import '../models/uv_model.dart';
-import 'threshold_logic.dart';
 
 /// Handles the Explainability (XAI) feature providing text-based reasons.
 class ExplainabilityLogic {
