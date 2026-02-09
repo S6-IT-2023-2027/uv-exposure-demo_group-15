@@ -1,33 +1,37 @@
 import 'package:flutter/material.dart';
-import '../logic/explainability.dart';
-import '../logic/threshold_logic.dart';
+import '../services/xai_service.dart';
 import '../widgets/primary_button.dart';
 import '../app/routes.dart';
 
 class ExplanationScreen extends StatelessWidget {
   final double cumulativeExposure;
-  final int oldThreshold;
-  final int feedbackIndex;
+  final double currentUV;
+  final double threshold; // New threshold
+  final double previousThreshold;
+  final String feedback;
 
   const ExplanationScreen({
     super.key,
     required this.cumulativeExposure,
-    required this.oldThreshold,
-    required this.feedbackIndex,
+    required this.currentUV,
+    required this.threshold,
+    required this.previousThreshold,
+    required this.feedback,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Generate explanation
-    String explanation = ExplainabilityLogic.generateDailyReport(
-      cumulativeExposure, 
-      oldThreshold, 
-      feedbackIndex
+    // Generate explanation using XAI Service
+    final xaiService = XAIService();
+    String explanation = xaiService.generateExplanation(
+      currentUV: currentUV,
+      cumulativeUV: cumulativeExposure,
+      threshold: threshold,
+      feedback: feedback,
+      previousThreshold: previousThreshold,
     );
 
-    // Calculate new threshold
-    int newThreshold = ThresholdLogic.adjustThreshold(oldThreshold, feedbackIndex);
-    int diff = newThreshold - oldThreshold;
+    double diff = threshold - previousThreshold;
     String sign = diff >= 0 ? "+" : "";
 
     return Scaffold(
@@ -41,6 +45,7 @@ class ExplanationScreen extends StatelessWidget {
             Text(
               "Daily Summary",
               style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             Container(
@@ -55,9 +60,17 @@ class ExplanationScreen extends StatelessWidget {
                 textAlign: TextAlign.justify,
               ),
             ),
-            const SizedBox(height: 32),
+            
+            const SizedBox(height: 10),
+            Text(
+              "This system learns from your feedback over time.",
+              style: TextStyle(color: Colors.grey[500], fontSize: 12, fontStyle: FontStyle.italic),
+            ),
+            
+            const SizedBox(height: 20),
             const Divider(),
             const SizedBox(height: 16),
+            
             Text(
               "Adaptive Adjustment",
               style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey),
@@ -67,7 +80,7 @@ class ExplanationScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "$oldThreshold",
+                  previousThreshold.toStringAsFixed(0),
                   style: const TextStyle(fontSize: 24, color: Colors.grey),
                 ),
                 const Padding(
@@ -75,13 +88,13 @@ class ExplanationScreen extends StatelessWidget {
                   child: Icon(Icons.arrow_forward, color: Colors.grey),
                 ),
                 Text(
-                  "$newThreshold",
+                  threshold.toStringAsFixed(0),
                   style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.teal),
                 ),
               ],
             ),
             Text(
-              "($sign$diff to your daily limit)",
+              "($sign${diff.toStringAsFixed(0)} to your daily limit)",
               style: TextStyle(
                 color: diff >= 0 ? Colors.green : Colors.orange,
                 fontWeight: FontWeight.bold
@@ -96,7 +109,7 @@ class ExplanationScreen extends StatelessWidget {
                   context, 
                   AppRoutes.dashboard, 
                   (route) => false,
-                  arguments: newThreshold
+                  arguments: threshold.toInt() // integer strictly for backward compat if needed, though we use service mostly
                 );
               },
             ),

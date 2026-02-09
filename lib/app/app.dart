@@ -27,32 +27,40 @@ class UVApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const QuestionnaireScreen());
           
           case AppRoutes.dashboard:
-            // Expecting int argument for threshold
-            final args = settings.arguments as int?;
+            // Expecting int argument for initial threshold (optional, service manages real state)
+            final args = settings.arguments;
+            int threshold = AppConstants.defaultThreshold;
+            if (args is int) {
+              threshold = args;
+            } else if (args is double) {
+              threshold = args.toInt();
+            }
+            
             return MaterialPageRoute(
               builder: (_) => DashboardScreen(
-                initialThreshold: args ?? AppConstants.defaultThreshold,
+                initialThreshold: threshold,
               ),
             );
           
           case AppRoutes.feedback:
-            // Expecting Map with cumulative & threshold
             final args = settings.arguments as Map<String, dynamic>;
             return MaterialPageRoute(
               builder: (_) => FeedbackScreen(
-                cumulativeExposure: args['cumulative'] as double,
-                currentThreshold: args['threshold'] as int,
+                cumulativeExposure: (args['cumulative'] as num).toDouble(),
+                currentThreshold: (args['threshold'] as num).toDouble(),
+                currentUV: (args['currentUV'] as num).toDouble(),
               ),
             );
           
           case AppRoutes.explanation:
-            // Expecting Map with cumulative, threshold, feedback
             final args = settings.arguments as Map<String, dynamic>;
             return MaterialPageRoute(
               builder: (_) => ExplanationScreen(
-                cumulativeExposure: args['cumulative'] as double,
-                oldThreshold: args['threshold'] as int,
-                feedbackIndex: args['feedback'] as int,
+                cumulativeExposure: (args['cumulative'] as num).toDouble(),
+                currentUV: (args['currentUV'] as num).toDouble(),
+                threshold: (args['threshold'] as num).toDouble(),
+                previousThreshold: (args['previousThreshold'] as num).toDouble(),
+                feedback: args['feedback'] as String,
               ),
             );
             

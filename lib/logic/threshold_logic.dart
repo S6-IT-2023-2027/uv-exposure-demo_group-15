@@ -1,17 +1,19 @@
+import '../models/skin_type_model.dart';
+
 /// Manages the logic for determining and updating the user's UV threshold.
 class ThresholdLogic {
   
   /// Returns initial threshold based on questionnaire answer index (0-4).
   /// 0: Always burns (Sensitive) -> Low threshold
   /// 4: Never burns (Resilient) -> High threshold
-  static int getInitialThreshold(int answerIndex) {
-    switch (answerIndex) {
-      case 0: return 50;  // Very Sensitive
-      case 1: return 80;  // Sensitive
-      case 2: return 120; // Moderate
-      case 3: return 160; // High
-      case 4: return 200; // Very High
-      default: return 100;
+  static int getInitialThreshold(SkinType skinType) {
+    switch (skinType) {
+      case SkinType.I: return 50;
+      case SkinType.II: return 80;
+      case SkinType.III: return 110;
+      case SkinType.IV: return 140;
+      case SkinType.V: return 170;
+      case SkinType.VI: return 200;
     }
   }
 

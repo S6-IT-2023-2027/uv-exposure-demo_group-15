@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import '../widgets/primary_button.dart';
+import '../services/ml_service.dart';
 import '../app/routes.dart';
 
 class FeedbackScreen extends StatefulWidget {
   final double cumulativeExposure;
-  final int currentThreshold;
+  final double currentThreshold; // Changed from int to double
+  final double currentUV;
 
   const FeedbackScreen({
     super.key, 
     required this.cumulativeExposure,
     required this.currentThreshold,
+    required this.currentUV,
   });
 
   @override
@@ -19,11 +22,20 @@ class FeedbackScreen extends StatefulWidget {
 class _FeedbackScreenState extends State<FeedbackScreen> {
   int _selectedFeedback = -1;
   final List<String> _options = [
-    "None (No redness/pain)",
-    "Mild (Slight pinkness)",
-    "Moderate (Visible burn)",
-    "Severe (Painful burn)"
+    "None",
+    "Mild",
+    "Moderate",
+    "Severe"
   ];
+  
+  final List<String> _descriptions = [
+    "(No redness or pain)",
+    "(Slight pinkness)",
+    "(Visible burn)",
+    "(Painful burn / Blistering)"
+  ];
+  
+  bool _isUpdating = false;
 
   @override
   Widget build(BuildContext context) {
@@ -43,25 +55,30 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
             child: ListView.builder(
               itemCount: _options.length,
               itemBuilder: (context, index) {
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  color: _selectedFeedback == index ? Colors.teal[50] : Colors.white,
-                  child: ListTile(
-                    title: Text(_options[index]),
-                    leading: Radio<int>(
-                      value: index,
-                      groupValue: _selectedFeedback,
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedFeedback = val!;
-                        });
-                      },
+                bool isSelected = _selectedFeedback == index;
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedFeedback = index;
+                    });
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected ? Colors.teal.withOpacity(0.1) : Colors.white,
+                      border: Border.all(
+                        color: isSelected ? Colors.teal : Colors.grey.shade300,
+                        width: isSelected ? 2 : 1
+                      ),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    onTap: () {
-                      setState(() {
-                        _selectedFeedback = index;
-                      });
-                    },
+                    child: ListTile(
+                      title: Text(_options[index], style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(_descriptions[index]),
+                      trailing: isSelected 
+                        ? const Icon(Icons.check_circle, color: Colors.teal)
+                        : const Icon(Icons.circle_outlined, color: Colors.grey),
+                    ),
                   ),
                 );
               },
@@ -70,16 +87,37 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: PrimaryButton(
-              text: "See Analysis",
-              onPressed: _selectedFeedback != -1
-                  ? () {
+              text: _isUpdating ? "Updating..." : "Submit & Analyze",
+              onPressed: (_selectedFeedback != -1 && !_isUpdating)
+                  ? () async {
+                      setState(() {
+                        _isUpdating = true;
+                      });
+
+                      // 1. Update Threshold (ML)
+                      final mlService = AdaptiveThresholdService();
+                      String feedbackLabel = _options[_selectedFeedback];
+                      
+                      // Store old threshold for comparison
+                      double previousThreshold = widget.currentThreshold;
+                      
+                      await mlService.updateThreshold(feedbackLabel);
+                      
+                      // Get new threshold
+                      double newThreshold = mlService.dailySafeExposureLimit;
+
+                      if (!mounted) return;
+
+                      // 2. Navigate to Explanation
                       Navigator.pushNamed(
                         context,
                         AppRoutes.explanation,
                         arguments: {
                           'cumulative': widget.cumulativeExposure,
-                          'threshold': widget.currentThreshold,
-                          'feedback': _selectedFeedback,
+                          'currentUV': widget.currentUV,
+                          'threshold': newThreshold, // The NEW adapted threshold
+                          'previousThreshold': previousThreshold,
+                          'feedback': feedbackLabel,
                         },
                       );
                     }
