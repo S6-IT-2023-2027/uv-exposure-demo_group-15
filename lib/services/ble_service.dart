@@ -19,49 +19,38 @@ final thresholdCharacteristicUUID =
   /// Scan and connect to ESP32
   Future<void> startScan(Function(String) onData) async {
 
-    await FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
+  print("Starting BLE scan...");
 
-    FlutterBluePlus.scanResults.listen((results) async {
+  FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
 
-      for (ScanResult r in results) {
+  FlutterBluePlus.scanResults.listen((results) async {
 
-        String deviceName = r.advertisementData.advName;
-        print("Device found: $deviceName");
+    for (ScanResult r in results) {
 
-        if (deviceName == "UV_Monitor") {
+      print("Found device: ${r.device.remoteId}");
 
-          print("UV Monitor found!");
+      // Check if device advertises our service
+      if (r.advertisementData.serviceUuids.contains(
+          "12345678-1234-1234-1234-123456789abc")) {
 
-          await FlutterBluePlus.stopScan();
+        print("UV Monitor found!");
 
-          connectedDevice = r.device;
+        await FlutterBluePlus.stopScan();
 
-          try {
-            await connectedDevice!.connect(timeout: const Duration(seconds: 5));
-          } catch (_) {}
+        connectedDevice = r.device;
 
-          connectedDevice!.connectionState.listen((state) {
+        try {
+          await connectedDevice!.connect(timeout: const Duration(seconds: 5));
+        } catch (_) {}
 
-            if (state == BluetoothConnectionState.disconnected) {
+        await _discoverServices(onData);
 
-              print("Device disconnected");
-              startScan(onData);
-
-            }
-
-          });
-
-          await _discoverServices(onData);
-
-          break;
-
-        }
-
+        break;
       }
+    }
 
-    });
-
-  }
+  });
+}
 
   /// Discover BLE services
   Future<void> _discoverServices(Function(String) onData) async {
