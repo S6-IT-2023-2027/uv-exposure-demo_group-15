@@ -28,7 +28,7 @@ class BLEService {
 
           connectedDevice = r.device;
 
-          await connectedDevice!.connect();
+          await connectedDevice!.connect(timeout: const Duration(seconds: 10));
 
           await _discoverServices(onData);
 
