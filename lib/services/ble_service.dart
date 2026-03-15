@@ -8,10 +8,10 @@ class BLEService {
     Guid("12345678-1234-1234-1234-123456789abc");
 
 final uvCharacteristicUUID =
-    Guid("12345678-1234-1234-1234-123456789abd");
+    Guid("0000abcd-0000-1000-8000-00805f9b34fb");
 
 final thresholdCharacteristicUUID =
-    Guid("12345678-1234-1234-1234-123456789abe");
+    Guid("0000ef01-0000-1000-8000-00805f9b34fb");
 
   BluetoothCharacteristic? uvCharacteristic;
   BluetoothCharacteristic? thresholdCharacteristic;
@@ -19,38 +19,38 @@ final thresholdCharacteristicUUID =
   /// Scan and connect to ESP32
   Future<void> startScan(Function(String) onData) async {
 
-  print("Starting BLE scan...");
+    print("Starting BLE scan...");
 
-  FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
+    await FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
 
-  FlutterBluePlus.scanResults.listen((results) async {
+    FlutterBluePlus.scanResults.listen((results) async {
 
-    for (ScanResult r in results) {
+      for (ScanResult r in results) {
 
-      print("Found device: ${r.device.remoteId}");
+        print("Found device: ${r.advertisementData.advName}");
 
-      // Check if device advertises our service
-      if (r.advertisementData.serviceUuids.contains(
-          "12345678-1234-1234-1234-123456789abc")) {
+        // Detect ESP32 by name
+        if (r.advertisementData.advName == "UV_Monitor") {
 
-        print("UV Monitor found!");
+          print("UV Monitor detected!");
 
-        await FlutterBluePlus.stopScan();
+          await FlutterBluePlus.stopScan();
 
-        connectedDevice = r.device;
+          connectedDevice = r.device;
 
-        try {
-          await connectedDevice!.connect(timeout: const Duration(seconds: 5));
-        } catch (_) {}
+          try {
+            await connectedDevice!.connect();
+          } catch (_) {}
 
-        await _discoverServices(onData);
+          await _discoverServices(onData);
 
-        break;
+          break;
+        }
       }
-    }
 
-  });
-}
+    });
+
+  }
 
   /// Discover BLE services
   Future<void> _discoverServices(Function(String) onData) async {
