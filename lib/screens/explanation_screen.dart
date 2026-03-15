@@ -21,14 +21,12 @@ class ExplanationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Generate explanation using XAI Service
+    // Generate explanation from real BLE-derived session data.
     final xaiService = XAIService();
-    String explanation = xaiService.generateExplanation(
-      currentUV: currentUV,
-      cumulativeUV: cumulativeExposure,
+    final String explanation = xaiService.generateExplanation(
+      cumulativeExposure: cumulativeExposure,
       threshold: threshold,
-      feedback: feedback,
-      previousThreshold: previousThreshold,
+      currentUV: currentUV,
     );
 
     double diff = threshold - previousThreshold;

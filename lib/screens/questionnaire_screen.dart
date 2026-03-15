@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/primary_button.dart';
 import '../app/routes.dart';
-import '../logic/threshold_logic.dart';
 import '../models/skin_type_model.dart';
-import '../core/theme.dart';
 import '../services/ml_service.dart';
 
 class QuestionnaireScreen extends StatefulWidget {
@@ -305,7 +303,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                            ),
                          ),
                        );
-                    }).toList(),
+                    }),
                   ],
                 );
               },

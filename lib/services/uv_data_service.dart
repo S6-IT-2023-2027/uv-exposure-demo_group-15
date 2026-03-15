@@ -1,20 +1,34 @@
 import 'dart:async';
-import 'dart:math';
 
+/// UV data accumulation service.
+///
+/// Receives real UV index values pushed by the BLE service (originating from
+/// the GUVA-S12SD sensor on the ESP32) and accumulates a daily exposure total.
+///
+/// The simulated timer has been removed.  Data now flows:
+///   BLEService.onData callback → [updateFromBLE] → streams → UI
+///
+/// Integration interval: the ESP32 sends a reading every 5 seconds, so the
+/// integration step uses a 5-second window (5 / 3600 h) to keep cumulative
+/// units consistent with UV-index·hours.
 class UVDataService {
+  // Singleton
   static final UVDataService _instance = UVDataService._internal();
 
-  factory UVDataService() {
-    return _instance;
-  }
+  factory UVDataService() => _instance;
 
   UVDataService._internal();
 
-  // Observable values
+  // ─── State ────────────────────────────────────────────────────────────────
+
   double _currentUV = 0.0;
   double _cumulativeUV = 0.0;
 
-  // Stream controllers to broadcast updates
+  // BLE sends every 5 seconds → integration window in hours
+  static const double _integrationStepHours = 5.0 / 3600.0;
+
+  // ─── Streams ───────────────────────────────────────────────────────────────
+
   final _uvController = StreamController<double>.broadcast();
   final _cumulativeController = StreamController<double>.broadcast();
 
@@ -24,49 +38,36 @@ class UVDataService {
   double get currentUV => _currentUV;
   double get cumulativeUV => _cumulativeUV;
 
-  Timer? _timer;
-  final Random _random = Random();
+  // ─── BLE data entry point ─────────────────────────────────────────────────
 
-  void startService() {
-    if (_timer != null && _timer!.isActive) return;
+  /// Called by [BLEService] whenever a new UV value arrives from the ESP32.
+  ///
+  /// [rawData] is the UTF-8 string sent over BLE (e.g. "7.3" or "5").
+  /// Invalid / non-numeric strings are silently ignored.
+  void updateFromBLE(String rawData) {
+    final double? parsed = double.tryParse(rawData.trim());
+    if (parsed == null || parsed < 0) return; // guard against malformed data
 
-    // Simulate UV data updates every 5 seconds
-    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      _updateUVData();
-    });
-  }
+    _currentUV = parsed;
 
-  void stopService() {
-    _timer?.cancel();
-  }
+    // Accumulate: UV index × time-window (hours) → UV-index·hours
+    _cumulativeUV += _currentUV * _integrationStepHours;
 
-  void _updateUVData() {
-    // Simulate UV Index fluctuation (e.g., between 0 and 11+)
-    // For demo purposes, we'll keep it somewhat realistic for a sunny day
-    // Base value around 5.0, fluctuating +/- 2.0
-    double fluctuation = (_random.nextDouble() * 4.0) - 2.0; // -2.0 to 2.0
-    double newValue = 5.0 + fluctuation;
-    
-    // Ensure positive value
-    _currentUV = newValue < 0 ? 0 : double.parse(newValue.toStringAsFixed(1));
-    
-    // Update cumulative UV (simple integration simulation)
-    // Adding a fraction of current UV to cumulative
-    _cumulativeUV += (_currentUV * 0.1); 
-
-    // Broadcast updates
     _uvController.add(_currentUV);
     _cumulativeController.add(_cumulativeUV);
   }
 
+  // ─── Lifecycle ─────────────────────────────────────────────────────────────
+
+  /// Reset the daily cumulative total (call at the start of each new day or
+  /// after the user completes their daily check-in).
   void reset() {
     _cumulativeUV = 0.0;
     _cumulativeController.add(_cumulativeUV);
   }
-  
+
   void dispose() {
     _uvController.close();
     _cumulativeController.close();
-    _timer?.cancel();
   }
 }
