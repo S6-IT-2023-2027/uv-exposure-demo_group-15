@@ -19,23 +19,41 @@ final thresholdCharacteristicUUID =
   /// Scan and connect to ESP32
   Future<void> startScan(Function(String) onData) async {
 
-    await FlutterBluePlus.startScan(
-      timeout: const Duration(seconds: 5),
-    );
+    await FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
 
     FlutterBluePlus.scanResults.listen((results) async {
 
       for (ScanResult r in results) {
 
-        if (r.device.platformName == "UV_Monitor") {
+        String deviceName = r.advertisementData.advName;
+        print("Device found: $deviceName");
+
+        if (deviceName == "UV_Monitor") {
+
+          print("UV Monitor found!");
 
           await FlutterBluePlus.stopScan();
 
           connectedDevice = r.device;
 
-          await connectedDevice!.connect(timeout: const Duration(seconds: 10));
+          try {
+            await connectedDevice!.connect(timeout: const Duration(seconds: 5));
+          } catch (_) {}
+
+          connectedDevice!.connectionState.listen((state) {
+
+            if (state == BluetoothConnectionState.disconnected) {
+
+              print("Device disconnected");
+              startScan(onData);
+
+            }
+
+          });
 
           await _discoverServices(onData);
+
+          break;
 
         }
 
