@@ -21,10 +21,10 @@ class UVApp extends StatelessWidget {
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case AppRoutes.onboarding:
-            return MaterialPageRoute(builder: (_) => OnboardingScreen());
+            return MaterialPageRoute(builder: (_) => const StartScreen());
           
           case AppRoutes.questionnaire:
-            return MaterialPageRoute(builder: (_) => QuestionnaireScreen());
+            return MaterialPageRoute(builder: (_) => const QuestionnaireScreen());
           
           case AppRoutes.dashboard:
             // Expecting int argument for initial threshold (optional, service manages real state)
@@ -65,7 +65,7 @@ class UVApp extends StatelessWidget {
             );
             
           default:
-            return MaterialPageRoute(builder: (_) => OnboardingScreen());
+            return MaterialPageRoute(builder: (_) => const StartScreen());
         }
       },
     );
