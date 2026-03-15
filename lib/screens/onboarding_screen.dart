@@ -16,7 +16,16 @@ class OnboardingScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              const Icon(Icons.wb_sunny_rounded, size: 100, color: Colors.orangeAccent),
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset("assets/logo/uv_sense_logo.png", width: 150),
+                    const SizedBox(height: 20),
+                    const Text("UV Sense", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
               const SizedBox(height: 32),
               Text(
                 AppConstants.onboardingTitle,
