@@ -1,55 +1,50 @@
 import 'package:flutter/material.dart';
-import '../core/constants.dart';
 import '../widgets/primary_button.dart';
 import '../app/routes.dart';
 
-class OnboardingScreen extends StatelessWidget {
-  const OnboardingScreen({super.key});
+class StartScreen extends StatelessWidget {
+  const StartScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
+          padding: const EdgeInsets.symmetric(horizontal: 28),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+
               const Spacer(),
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset("assets/logo/uv_sense_logo.png", width: 150),
-                    const SizedBox(height: 20),
-                    const Text("UV Sense", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-                  ],
+
+              Image.asset(
+                'assets/logo/uv_sense_logo.png',
+                height: 130,
+              ),
+
+              const SizedBox(height: 40),
+
+              const Text(
+                "This app tracks UV exposure and learns your personal sun tolerance.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
                 ),
               ),
-              const SizedBox(height: 32),
-              Text(
-                AppConstants.onboardingTitle,
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.teal[800],
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                AppConstants.onboardingDesc,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                textAlign: TextAlign.center,
-              ),
+
               const Spacer(),
+
               PrimaryButton(
-                text: AppConstants.startSetup,
+                text: "Start Setup",
                 onPressed: () {
                   Navigator.pushNamed(context, AppRoutes.questionnaire);
                 },
               ),
+
+              const SizedBox(height: 30),
+
             ],
           ),
         ),

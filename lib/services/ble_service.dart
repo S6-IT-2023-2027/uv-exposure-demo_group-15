@@ -4,9 +4,14 @@ class BLEService {
 
   BluetoothDevice? connectedDevice;
 
-  final serviceUUID = Guid("12345678-1234-1234-1234-123456789abc");
-  final uvCharacteristicUUID = Guid("abcd");
-  final thresholdCharacteristicUUID = Guid("efgh");
+  final serviceUUID =
+    Guid("12345678-1234-1234-1234-123456789abc");
+
+final uvCharacteristicUUID =
+    Guid("12345678-1234-1234-1234-123456789abd");
+
+final thresholdCharacteristicUUID =
+    Guid("12345678-1234-1234-1234-123456789abe");
 
   BluetoothCharacteristic? uvCharacteristic;
   BluetoothCharacteristic? thresholdCharacteristic;
