@@ -34,9 +34,10 @@ class ExplanationScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text("Analysis")),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Icon(Icons.insights, size: 80, color: Colors.indigo),
             const SizedBox(height: 24),
@@ -98,7 +99,7 @@ class ExplanationScreen extends StatelessWidget {
                 fontWeight: FontWeight.bold
               ),
             ),
-            const Spacer(),
+            const SizedBox(height: 32),
             PrimaryButton(
               text: "Back to Home",
               onPressed: () {

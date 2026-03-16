@@ -217,12 +217,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               final double currentCumulative =
                   cumulativeSnapshot.data ?? 0.0;
 
-              // ── Cumulative threshold warning (personalised ML limit) ──────
+              // ── Cumulative threshold warning (MED-based daily dose limit) ──
+              // Uses the medThreshold (J/m²) from UVDataService as the primary
+              // safety boundary; the ML-personalised threshold still drives the
+              // feedback → adapt loop via _currentThreshold.
+              final double medLimit = _uvService.medThreshold;
               final bool cumulativeWarning =
-                  currentCumulative >= _currentThreshold;
+                  currentCumulative >= medLimit;
 
               final double progress =
-                  (currentCumulative / _currentThreshold).clamp(0.0, 1.0);
+                  (currentCumulative / medLimit).clamp(0.0, 1.0);
 
               // ── Dynamic UV card colour ───────────────────────────────────
               final Color uvCardColor = _bleUV == '0.0'
@@ -286,7 +290,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               child: Text(
                                 _xaiService.shortWarning(
                                   cumulativeExposure: currentCumulative,
-                                  threshold: _currentThreshold,
+                                  threshold: medLimit,
                                   currentUV: currentUV,
                                 ),
                                 style: const TextStyle(
@@ -360,8 +364,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Expanded(
                           child: _buildInfoCard(
                             title: "Limit",
-                            value: _currentThreshold.toStringAsFixed(0),
-                            subtitle: "Daily Budget",
+                            value: _uvService.medThreshold.toStringAsFixed(0),
+                            subtitle: "MED Threshold (J/m²)",
                             color: Colors.teal,
                           ),
                         ),
@@ -371,8 +375,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Expanded(
                           child: _buildInfoCard(
                             title: "Used",
-                            value: currentCumulative.toStringAsFixed(0),
-                            subtitle: "Accumulated",
+                            value: currentCumulative.toStringAsFixed(1),
+                            subtitle: "J/m² Dose",
                             color: Colors.blueGrey,
                           ),
                         ),

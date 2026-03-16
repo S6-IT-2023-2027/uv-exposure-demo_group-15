@@ -38,10 +38,10 @@ class BLEService {
 
         // Detect ESP32 by name instantly as the broadcasts come in
         // Support both exact caps or all caps if user changed it.
-        if (deviceName.toUpperCase() == "UV_MONITOR") {
+        if (deviceName.toUpperCase().contains("UV_MONITOR")) {
           
           print("UV Monitor detected instantly!");
-
+  
           await FlutterBluePlus.stopScan();
 
           connectedDevice = r.device;
