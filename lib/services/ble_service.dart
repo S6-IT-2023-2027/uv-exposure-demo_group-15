@@ -20,49 +20,38 @@ final thresholdCharacteristicUUID =
 
   /// Scan and connect to ESP32
   Future<void> startScan(Function(String) onData) async {
-    if (_isConnecting) return;
 
-    print("Starting BLE scan...");
+  print("Scanning for devices...");
 
-    // 1. Setup listener FIRST before blocking the thread with await!
-    // (If you await startScan first, it halts the entire connection response for 10 seconds empty-handed)
-    FlutterBluePlus.scanResults.listen((results) async {
-      for (ScanResult r in results) {
-        
-        // Detect ESP32 by name instantly as the broadcasts come in
-        if (r.advertisementData.advName == "UV_Monitor") {
-          
-          if (_isConnecting) return; // Prevent dual-firing the connect sequence
-          _isConnecting = true;
-          
-          print("UV Monitor detected instantly!");
+  await FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
 
-          await FlutterBluePlus.stopScan();
+  FlutterBluePlus.scanResults.listen((results) async {
 
-          connectedDevice = r.device;
+    for (ScanResult r in results) {
 
-          try {
-            await connectedDevice!.connect();
-          } catch (_) {
-            _isConnecting = false;
-            return;
-          }
+      String name = r.device.platformName;
 
-          // Monitor for accidental drops and auto-reconnect
-          connectedDevice!.connectionState.listen((state) {
-            if (state == BluetoothConnectionState.disconnected) {
-              print("Device disconnected. Auto-reconnecting...");
-              _isConnecting = false;
-              startScan(onData);
-            }
-          });
+      print("Found device: $name");
 
-          await _discoverServices(onData);
-          break;
-        }
+      if (name == "UV_MONITOR") {
+
+        print("UV monitor detected");
+
+        await FlutterBluePlus.stopScan();
+
+        connectedDevice = r.device;
+
+        try {
+          await connectedDevice!.connect();
+        } catch (_) {}
+
+        await _discoverServices(onData);
+
+        break;
       }
-    });
-
+    }
+  });
+}
     // 2. Fire the scan now that the net is listening
     try {
       await FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
