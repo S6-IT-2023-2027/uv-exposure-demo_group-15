@@ -218,10 +218,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   cumulativeSnapshot.data ?? 0.0;
 
               // ── Cumulative threshold warning (MED-based daily dose limit) ──
-              // Uses the medThreshold (J/m²) from UVDataService as the primary
-              // safety boundary; the ML-personalised threshold still drives the
-              // feedback → adapt loop via _currentThreshold.
-              final double medLimit = _uvService.medThreshold;
+              // Uses the ML-personalised threshold as the primary
+              // safety boundary to drive the feedback → adapt loop.
+              final double medLimit = _currentThreshold;
               final bool cumulativeWarning =
                   currentCumulative >= medLimit;
 
@@ -364,7 +363,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Expanded(
                           child: _buildInfoCard(
                             title: "Limit",
-                            value: _uvService.medThreshold.toStringAsFixed(0),
+                            value: _currentThreshold.toStringAsFixed(0),
                             subtitle: "MED Threshold (J/m²)",
                             color: Colors.teal,
                           ),
@@ -426,8 +425,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                         child: const Text("Give Feedback / End Day"),
 
-                        onPressed: () {
-                          Navigator.pushNamed(
+                        onPressed: () async {
+                          await Navigator.pushNamed(
                             context,
                             AppRoutes.feedback,
                             arguments: {
@@ -436,6 +435,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               'currentUV': currentUV,
                             },
                           );
+                          if (mounted) {
+                            setState(() {
+                              _currentThreshold = _mlService.dailySafeExposureLimit;
+                            });
+                          }
                         },
 
                       ),

@@ -75,28 +75,75 @@ class ExplanationScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey),
             ),
             const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  previousThreshold.toStringAsFixed(0),
-                  style: const TextStyle(fontSize: 24, color: Colors.grey),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Icon(Icons.arrow_forward, color: Colors.grey),
-                ),
-                Text(
-                  threshold.toStringAsFixed(0),
-                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.teal),
-                ),
-              ],
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Previous limit:", style: TextStyle(fontSize: 16, color: Colors.grey)),
+                      Text("${previousThreshold.toStringAsFixed(0)} J/m²", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("New limit:", style: TextStyle(fontSize: 16, color: Colors.black87)),
+                      Text("${threshold.toStringAsFixed(0)} J/m²", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal)),
+                    ],
+                  ),
+                  const Divider(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Change:", style: TextStyle(fontSize: 16, color: Colors.black87)),
+                      Text(
+                        "${diff > 0 ? 'Increased' : diff < 0 ? 'Reduced' : 'Maintained'} by ${diff.abs().toStringAsFixed(0)} J/m²",
+                        style: TextStyle(
+                          color: diff > 0 ? Colors.green : (diff < 0 ? Colors.orange : Colors.grey),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(height: 24),
             Text(
-              "($sign${diff.toStringAsFixed(0)} to your daily limit)",
-              style: TextStyle(
-                color: diff >= 0 ? Colors.green : Colors.orange,
-                fontWeight: FontWeight.bold
+              "Reason for adjustment",
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blueGrey.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildBulletPoint("High UV exposure detected"),
+                  _buildBulletPoint(
+                      feedback == 'None'
+                          ? "User feedback indicated no skin discomfort"
+                          : "User feedback indicated ${feedback.toLowerCase()} skin redness"),
+                  _buildBulletPoint(
+                      diff > 0
+                          ? "System increased safe exposure threshold"
+                          : diff < 0
+                              ? "System reduced safe exposure threshold"
+                              : "System maintained safe exposure threshold"),
+                ],
               ),
             ),
             const SizedBox(height: 32),
@@ -114,6 +161,19 @@ class ExplanationScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBulletPoint(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text("• ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Expanded(child: Text(text, style: const TextStyle(fontSize: 15, height: 1.4))),
+        ],
       ),
     );
   }
