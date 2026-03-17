@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'storage_service.dart';
 
 /// UV data service — Medically accurate MED-based UV energy dose model.
 ///
@@ -89,6 +90,12 @@ class UVDataService {
         (_currentUV * _irradiancePerUVI * _integrationSeconds) / 1000.0;
 
     _cumulativeDose += energyDose;
+
+    // Save to local Hive storage background layer
+    StorageService().addExposureData(
+      uvIndex: _currentUV,
+      energyDose: energyDose,
+    );
 
     _uvController.add(_currentUV);
     _cumulativeController.add(_cumulativeDose);

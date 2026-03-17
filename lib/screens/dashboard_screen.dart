@@ -5,6 +5,7 @@ import '../services/xai_service.dart';
 import '../services/notification_service.dart';
 import '../app/routes.dart';
 import '../services/ble_service.dart';
+import '../widgets/uv_exposure_graph.dart';
 
 class DashboardScreen extends StatefulWidget {
   final int initialThreshold;
@@ -382,6 +383,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                       ],
                     ),
+
+                    const SizedBox(height: 24),
+
+                    // ── 5. UV Exposure Graph ───────────────────────────────
+                    const UVExposureGraph(),
 
                     const Spacer(),
 

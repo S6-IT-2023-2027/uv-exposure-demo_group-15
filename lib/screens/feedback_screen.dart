@@ -3,6 +3,7 @@ import '../widgets/primary_button.dart';
 import '../services/ml_service.dart';
 import '../services/xai_service.dart';
 import '../services/ble_service.dart';
+import '../services/storage_service.dart';
 import '../app/routes.dart';
 
 class FeedbackScreen extends StatefulWidget {
@@ -155,6 +156,10 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                             widget.cumulativeExposure,
                             feedbackLabel,
                           );
+
+                          // Save to Hive storage service
+                          StorageService().addFeedbackData(feedback: feedbackLabel);
+                          StorageService().updateAdaptiveThreshold(newThreshold);
 
                           // STEP 2: Send updated threshold to ESP32 via BLE
                           try {

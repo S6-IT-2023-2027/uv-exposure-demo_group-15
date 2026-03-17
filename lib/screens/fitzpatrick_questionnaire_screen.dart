@@ -4,6 +4,7 @@ import '../widgets/primary_button.dart';
 import '../app/routes.dart';
 import '../services/uv_data_service.dart';
 import '../services/ml_service.dart';
+import '../services/storage_service.dart';
 
 class FitzpatrickQuestionnaireScreen extends StatefulWidget {
   const FitzpatrickQuestionnaireScreen({super.key});
@@ -119,6 +120,13 @@ class _FitzpatrickQuestionnaireScreenState extends State<FitzpatrickQuestionnair
     // Initialize the ML service so it picks up the newly persisted limit
     final mlService = AdaptiveThresholdService();
     await mlService.initialize(totalScore);
+
+    // Save to Hive storage service
+    StorageService().saveUserData(
+      skinType: skinType,
+      medThreshold: medLimit,
+      adaptiveThreshold: medLimit,
+    );
 
     if (!mounted) return;
 
