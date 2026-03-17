@@ -3,7 +3,7 @@ import '../core/theme.dart';
 import '../core/constants.dart';
 import 'routes.dart';
 import '../screens/onboarding_screen.dart';
-import '../screens/questionnaire_screen.dart';
+import '../screens/fitzpatrick_questionnaire_screen.dart';
 import '../screens/dashboard_screen.dart';
 import '../screens/feedback_screen.dart';
 import '../screens/explanation_screen.dart';
@@ -24,7 +24,7 @@ class UVApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const StartScreen());
           
           case AppRoutes.questionnaire:
-            return MaterialPageRoute(builder: (_) => const QuestionnaireScreen());
+            return MaterialPageRoute(builder: (_) => const FitzpatrickQuestionnaireScreen());
           
           case AppRoutes.dashboard:
             // Expecting int argument for initial threshold (optional, service manages real state)
